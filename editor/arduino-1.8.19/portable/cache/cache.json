@@ -1,0 +1,55 @@
+{
+  "files" : [ {
+    "remoteURL" : "https://downloads.arduino.cc/libraries/library_index.json.gz",
+    "localPath" : "C:\\Users\\Rafael\\Documents\\GitHub\\Arduino-Quadrotor-X\\editor\\arduino-1.8.19\\portable\\cache\\downloads.arduino.cc\\libraries\\library_index.json.gz",
+    "eTag" : "ee233680c652e566d79502fae88fa3a1",
+    "md5" : "MD5:ee233680c652e566d79502fae88fa3a1",
+    "createdAt" : "2023-08-21T22:36:37.464",
+    "cacheControl" : {
+      "maxAge" : 14400,
+      "mustRevalidate" : false,
+      "noCache" : false,
+      "noStore" : false
+    },
+    "expires" : "2023-08-22T02:36:37.464"
+  }, {
+    "remoteURL" : "https://downloads.arduino.cc/libraries/library_index.json.sig",
+    "localPath" : "C:\\Users\\Rafael\\Documents\\GitHub\\Arduino-Quadrotor-X\\editor\\arduino-1.8.19\\portable\\cache\\downloads.arduino.cc\\libraries\\library_index.json.sig",
+    "eTag" : "2e580440540d6d3c43988ff4a47dff92",
+    "md5" : "MD5:2e580440540d6d3c43988ff4a47dff92",
+    "createdAt" : "2023-08-21T22:36:38.311",
+    "cacheControl" : {
+      "maxAge" : 14400,
+      "mustRevalidate" : false,
+      "noCache" : false,
+      "noStore" : false
+    },
+    "expires" : "2023-08-22T02:36:38.311"
+  }, {
+    "remoteURL" : "https://downloads.arduino.cc/packages/package_index.json.sig",
+    "localPath" : "C:\\Users\\Rafael\\Documents\\GitHub\\Arduino-Quadrotor-X\\editor\\arduino-1.8.19\\portable\\cache\\downloads.arduino.cc\\packages\\package_index.json.sig",
+    "eTag" : "95e9956c3908510dc29336bc2c101d25",
+    "md5" : "MD5:95e9956c3908510dc29336bc2c101d25",
+    "createdAt" : "2023-08-21T22:36:35.212",
+    "cacheControl" : {
+      "maxAge" : 3600,
+      "mustRevalidate" : false,
+      "noCache" : false,
+      "noStore" : false
+    },
+    "expires" : "2023-08-21T23:36:35.212"
+  }, {
+    "remoteURL" : "https://downloads.arduino.cc/packages/package_index.json",
+    "localPath" : "C:\\Users\\Rafael\\Documents\\GitHub\\Arduino-Quadrotor-X\\editor\\arduino-1.8.19\\portable\\cache\\downloads.arduino.cc\\packages\\package_index.json",
+    "eTag" : "959f103572cfa05013cdb0979be7138b",
+    "md5" : "MD5:959f103572cfa05013cdb0979be7138b",
+    "createdAt" : "2023-08-21T22:36:32.085",
+    "cacheControl" : {
+      "maxAge" : 3600,
+      "mustRevalidate" : false,
+      "noCache" : false,
+      "noStore" : false
+    },
+    "expires" : "2023-08-21T23:36:32.085"
+  } ]
+}

@@ -10,7 +10,7 @@ Version portable del editor con las librerias necesarias para la compilación y 
 
 Al utilizar el DMP con el Arduino el sensor es capaz de proporcionar los datos a una velocidad de 200 Hz pero con problemas de cortes en los datos, se para la comunicación de datos inexplicablemente, durante unos segundos o minutos.
 
-He intentado buscar la solución en algunos foros, pero no está claro, y tampoco queda sea por falta de capacidad del MCU. Con una teensy 4.0 parece que si que es capaz, pero tampoco está claro que sea cambiar el MCU por uno de mayor capacidad sea la solución.
+He intentado buscar la solución en algunos foros, pero no está claro, (21/08/2023 - parece ser que el protocolo de I2C implementado por por la DMP o la MCU no es totalmente compatible con el estandar I2C y a veces no contesta... según algún foro leído), y tampoco queda sea por falta de capacidad del MCU. Con una teensy 4.0 parece que si que es capaz, pero tampoco está claro que sea cambiar el MCU por uno de mayor capacidad sea la solución.
 
 Los datos de los ángulos se consiguen con éxito y funciona bastante bien el sensor. Queda la problemática de distinguir entre los datos del YawPitchRoll (Gravedad) y Euler; utiliza el vector gravedad y en el otro no. A 100 Hz en Arduino Nano parece que es capaz y sin problemas de funcionamiento.
 
