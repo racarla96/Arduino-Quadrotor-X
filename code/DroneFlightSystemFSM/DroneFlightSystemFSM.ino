@@ -34,7 +34,7 @@ State state_disarmed(&on_enter_disarmed, &on_state_disarmed, NULL);
 State state_flight(&on_enter_flight, &on_state_flight, NULL);
 State state_flight_failsafe(&on_enter_failsafe, NULL, NULL);
 State state_error(&on_enter_error, NULL, NULL);
-Fsm fsm(&state_disarmed);
+Fsm fsm(&state_flight);
 
 #define EVENT_DISARMING 0
 #define EVENT_ARMING 1
@@ -44,10 +44,10 @@ Fsm fsm(&state_disarmed);
 float max_throttle = 800; // 80% of the hole action control
 float max_u = 200; // 20% of the hole action control
 
-float Kp = 1;
-float Ki = 1;
-float Kt = 1;
-float Kd = 1;
+float Kp = 12;
+float Ki = 0;
+float Kt = 0;
+float Kd = 0;
 
 float ROLL_E = 0;
 float ROLL_SUM_E = 0;
@@ -65,35 +65,45 @@ float M1_U = 0;
 float M2_U = 0;
 float M3_U = 0;
 float M4_U = 0;
-float BIAS_U = 1000;
+float BIAS_U = 0;
+//float BIAS_U = 1000;
 
 float ROLL_SENS = 0;
 float PITCH_SENS = 0;
 
+float ROLL_SENS_BIAS = 0;
+float PITCH_SENS_BIAS = 0;
+
 float D_ROLL_SENS = 0;
 float D_PITCH_SENS = 0;
 
+float D_ROLL_SENS_BIAS = 0;
+float D_PITCH_SENS_BIAS = 0;
+
+unsigned long previousMicros = 0;  // Variable para almacenar el tiempo del último ciclo
+const unsigned long intervalMicros = 5000;  // Intervalo en microsegundos para un bucle a 200 Hz (1000000 us / 200 Hz)
+
 void on_enter_disarmed()
 {
-  
+
 }
 
 void on_state_disarmed()
 {
-//  while(1)
-//  {
-//    Serial.print(radio.getChannel(PIN_ROLL));
-//    Serial.print("\t");
-//    Serial.print(radio.getChannel(PIN_PITCH));
-//    Serial.print("\t");
-//    Serial.print(radio.getChannel(PIN_YAW));
-//    Serial.print("\t");
-//    Serial.print(radio.getChannel(PIN_THROTTLE));
-//    Serial.print("\t");
-//    Serial.print(radio.getChannel(PIN_AUX1));
-//    Serial.println();
-//    delay(50);
-//  }
+  //  while(1)
+  //  {
+  //    Serial.print(radio.getChannel(PIN_ROLL));
+  //    Serial.print("\t");
+  //    Serial.print(radio.getChannel(PIN_PITCH));
+  //    Serial.print("\t");
+  //    Serial.print(radio.getChannel(PIN_YAW));
+  //    Serial.print("\t");
+  //    Serial.print(radio.getChannel(PIN_THROTTLE));
+  //    Serial.print("\t");
+  //    Serial.print(radio.getChannel(PIN_AUX1));
+  //    Serial.println();
+  //    delay(50);
+  //  }
 
   // PRIMERO CODIGO DE VUELO, SI FUNCIONA, DE LOCOS!
 }
@@ -104,38 +114,70 @@ void on_enter_flight()
   PITCH_SUM_E = 0;
 }
 
-void on_state_flight() 
+void on_state_flight()
 {
-  while(1)
+  previousMicros = micros();
+
+  while (1)
   {
+    // Verificar si ha pasado el intervalo deseado
+    while (micros() < previousMicros) {}
+    previousMicros += intervalMicros;  // Actualizar el tiempo del último ciclo
+
     ROLL_REF = radio.getChannel(PIN_ROLL) * MAX_ANGLE_REF_DEG;
     PITCH_REF = radio.getChannel(PIN_PITCH) * MAX_ANGLE_REF_DEG;
-  
-    ROLL_SENS = mpu6050.getAngleX();
-    PITCH_SENS = mpu6050.getAngleY();
-  
-    D_ROLL_SENS = mpu6050.getGyroX();
-    D_PITCH_SENS = mpu6050.getGyroY();
-  
+
+    mpu6050.update();
+
+    ROLL_SENS = -(mpu6050.getAngleX() - ROLL_SENS_BIAS);
+    PITCH_SENS = -(mpu6050.getAngleY() - PITCH_SENS_BIAS);
+
+    D_ROLL_SENS = mpu6050.getGyroX() - D_ROLL_SENS_BIAS;
+    D_PITCH_SENS = mpu6050.getGyroY() - D_PITCH_SENS_BIAS;
+
+//    Serial.print(previousMicros);
+//    Serial.print("\t");
+//    Serial.print(ROLL_SENS);
+//    Serial.print("\t");
+//    Serial.print(PITCH_SENS);
+//    Serial.print("\t");
+//    Serial.print(D_ROLL_SENS);
+//    Serial.print("\t");
+//    Serial.print(D_PITCH_SENS);
+//    Serial.println();
+
     THROTTLE_U = radio.getChannel(PIN_THROTTLE) * max_throttle;
-    if(THROTTLE_U < 0) THROTTLE_U = 0;
-  
+    if (THROTTLE_U < 0) THROTTLE_U = 0;
+
     ROLL_E = ROLL_REF - ROLL_SENS;
     PITCH_E = PITCH_REF - PITCH_SENS;
-  
+
     ROLL_SUM_E += ROLL_E;
     PITCH_SUM_E += PITCH_E;
-  
+
     ROLL_U = Kp * ROLL_E + Ki * ROLL_SUM_E - Kd * D_ROLL_SENS;
     PITCH_U = Kp * PITCH_E + Ki * PITCH_SUM_E - Kd * D_PITCH_SENS;
-  
-    M1_U = BIAS_U + ROLL_U + PITCH_U;
-    M2_U = BIAS_U + ROLL_U + PITCH_U;
-    M3_U = BIAS_U + ROLL_U + PITCH_U;
+
+    M1_U = BIAS_U + ROLL_U - PITCH_U;
+    M2_U = BIAS_U - ROLL_U - PITCH_U;
+    M3_U = BIAS_U - ROLL_U + PITCH_U;
     M4_U = BIAS_U + ROLL_U + PITCH_U;
-  
+
     // DE MOMENTO SIN ANTIWINDUP Y SIN TRACKING MODE
     
+//    Serial.print(ROLL_SENS);
+//    Serial.print("\t");
+//    Serial.print(PITCH_SENS);
+//    Serial.print("\t");
+//    Serial.print(M1_U);
+//    Serial.print("\t");
+//    Serial.print(M2_U);
+//    Serial.print("\t");
+//    Serial.print(M3_U);
+//    Serial.print("\t");
+//    Serial.print(M4_U);
+//    Serial.println();
+
     M1.writeMicroseconds(M1_U);
     M2.writeMicroseconds(M2_U);
     M3.writeMicroseconds(M3_U);
@@ -145,13 +187,13 @@ void on_state_flight()
 
 void on_enter_failsafe()
 {
-  
+
 }
 
 void on_enter_error()
 {
 
-  
+
 }
 
 void setup()
@@ -160,18 +202,18 @@ void setup()
 
   Wire.begin();
   mpu6050.begin();
-  
+
   fsm.add_transition(&state_disarmed, &state_flight, EVENT_ARMING, NULL);
   fsm.add_transition(&state_flight, &state_disarmed, EVENT_DISARMING, NULL);
 
-  if(M1.attach(PIN_M1) == 0) fsm.trigger(EVENT_ERROR);
-  if(M2.attach(PIN_M2) == 0) fsm.trigger(EVENT_ERROR);
-  if(M3.attach(PIN_M3) == 0) fsm.trigger(EVENT_ERROR);
-  if(M4.attach(PIN_M4) == 0) fsm.trigger(EVENT_ERROR);
+  if (M1.attach(PIN_M1) == 0) fsm.trigger(EVENT_ERROR);
+  if (M2.attach(PIN_M2) == 0) fsm.trigger(EVENT_ERROR);
+  if (M3.attach(PIN_M3) == 0) fsm.trigger(EVENT_ERROR);
+  if (M4.attach(PIN_M4) == 0) fsm.trigger(EVENT_ERROR);
 
   radio.begin();
 
-  for(int i = 2; i < 8; i++) radio.addChannel(i); // PIN D2 al D7
+  for (int i = 2; i < 8; i++) radio.addChannel(i); // PIN D2 al D7
 
   radio.setMap(1010, 1536, 1990, PIN_ROLL);
   radio.setMap(1010, 1480, 1986, PIN_PITCH);
@@ -179,7 +221,30 @@ void setup()
   radio.setMap(1010, 1060, 1990, PIN_THROTTLE);
   radio.setMap(1010, 1480, 1990, PIN_AUX1, 1, 2, 3);
 
+  // CALIBRATION
+  previousMicros = micros();
+  for (int i = 0; i < 1000; i++)
+  {
+    // Verificar si ha pasado el intervalo deseado
+    while (micros() < previousMicros) {}
+    previousMicros += intervalMicros;  // Actualizar el tiempo del último ciclo
+
+    mpu6050.update();
+
+    ROLL_SENS_BIAS += mpu6050.getAngleX();
+    PITCH_SENS_BIAS += mpu6050.getAngleY();
+    
+    D_ROLL_SENS_BIAS += mpu6050.getGyroX();
+    D_PITCH_SENS_BIAS += mpu6050.getGyroY();
+  }
+
+  ROLL_SENS_BIAS /= 1000;
+  PITCH_SENS_BIAS /= 1000;
+
+  D_ROLL_SENS_BIAS /= 1000;
+  D_PITCH_SENS_BIAS /= 1000;
+
   fsm.run_machine();
 }
 
-void loop(){}
+void loop() {}
